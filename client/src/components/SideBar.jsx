@@ -61,7 +61,7 @@ const SideBar = ({ isMenuOpen, setIsMenuOpen }) => {
       </div>
 
       {/* credit purchase option */}
-      <div onClick={() => { navigate('/credit');setIsMenuOpen(false) }} className='flex items-center gap-2 p-3 mt-4 border border-gray-300 dark:border-white/15
+      <div onClick={() => { navigate('/credits');setIsMenuOpen(false) }} className='flex items-center gap-2 p-3 mt-4 border border-gray-300 dark:border-white/15
       rounded-md cursor-pointer hover:scale-103 transition-all'>
         <img src={assets.diamond_icon} className='w-4 dark:invert' alt="" />
         <div className='flex flex-col text-sm'>
@@ -83,7 +83,7 @@ const SideBar = ({ isMenuOpen, setIsMenuOpen }) => {
             className="sr-only peer"
             checked={theme === 'dark'}
           />
-          <div className="w-9 h-5 bg-gray-400 rounded-full overflow-hidden peer-checked:bg-purple-600 transition-all relative">
+          <div className="w-9 h-5 bg-gray-400 rounded-full overflow-hidden peer-checked:bg-blue-600 transition-all relative">
             <span className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transform transition-transform duration-300 peer-checked:translate-x-4"></span>
           </div>
         </label>
