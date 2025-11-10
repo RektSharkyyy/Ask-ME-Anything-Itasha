@@ -6,10 +6,14 @@ import userRouter from './routes/userRoutes.js'
 import chatRouter from './routes/chatRoutes.js'
 import messageRouter from './routes/messageRoutes.js'
 import creditRouter from './routes/creditRoutes.js'
+import { stripeWebhooks } from './controllers/webhooks.js'
 
 const app = express()
 
 await connectDB()
+
+// Stripe webhooks
+app.post('/api/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
 
 // Middleware
 app.use(cors())

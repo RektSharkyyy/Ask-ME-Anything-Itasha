@@ -1,4 +1,6 @@
 import Stripe from "stripe";
+import Transaction from "../models/Transaction";
+import User from "../models/user";
 
 export const stripeWebhooks = async (req, res) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -15,15 +17,41 @@ export const stripeWebhooks = async (req, res) => {
     try {
         switch (event.type) {
             case "payment_intent.succeeded": {
-                paym
+                paymentIntent = event.data.object;
+                const sessionList = await Stripe.Checkout.sessions.list({
+                    payment_intent: paymentIntent.id,
+                })
+
+                const session = sessionList.data[0];
+                const { transactionId, appId } = session.metadata;
+
+                if (appId === 'itasha') {
+                    const transaction = await Transaction.findOne({ _id: transactionId, isPaid: false })
+
+                    // Update credits in user account
+                    await User.updateOne({ _id: transaction.userId }, {
+                        $inc: {
+                            credits: transaction.credits
+                        }
+                    })
+
+                    // Upodate credit Payment status
+                    transaction.isPaid = true;
+                    await transaction.save();
+                } else {
+                    return res.json({ received: true, message: "Ignored event:Invalid app" })
+                }
+                break;
+
             }
 
-                break;
-
             default:
+                console.log("Unhandled event type:", event.type)
                 break;
         }
+        res.json({ received: true, })
     } catch (error) {
-
+        console.error("Webhook processing error", error)
+        response.status(500).send("Internal Server Error")
     }
 }
