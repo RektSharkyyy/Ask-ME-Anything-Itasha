@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 
 const SideBar = ({ isMenuOpen, setIsMenuOpen }) => {
 
-  const { chats, selectedChats, setSelectedChat, theme, setTheme, user, navigate, createNewChat, axios, setChats, fetchUsersChat, setToken, token } = useAppContext()
+  const { chats, selectedChats, setSelectedChat, theme, setTheme, user, navigate, createNewChat, axios, setChats, fetchUsersChats, setToken, token } = useAppContext()
   const [search, setSearch] = useState('')
 
   const logout = () => {
@@ -23,7 +23,7 @@ const SideBar = ({ isMenuOpen, setIsMenuOpen }) => {
       const { data } = await axios.post('/api/chat/delete', { chatId }, { headers: { Authorization: token } })
       if (data.success) {
         setChats(prev => prev.filter(chat => chat._id !== chatId))
-        await fetchUsersChat()
+        await fetchUsersChats()
         toast.success(data.message)
       }
     } catch (error) {
@@ -68,7 +68,23 @@ const SideBar = ({ isMenuOpen, setIsMenuOpen }) => {
                 </p>
                 <p className='text-xs text-gray-500 dark:text-[#B1A6C0]'>{moment(chat.updatedAt).fromNow()}</p>
               </div>
-              <img onClick={e => toast.promise(deleteChat(e, chat._id), { loading: 'deleting...' })} src={assets.bin_icon} className='hidden group-hover:block w-4 cursor-pointer not-dark:invert' alt="" />
+              <img
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast.promise(
+                    deleteChat(e, chat._id),
+                    {
+                      loading: 'Deleting...',
+                      success: 'Deleted',
+                      error: (err) => err.message || 'Failed to delete',
+                    }
+                  );
+                }}
+                src={assets.bin_icon}
+                className='hidden group-hover:block w-4 cursor-pointer'
+                alt=''
+              />
+
             </div>
           ))
         }

@@ -14,7 +14,7 @@ const ChatBox = () => {
   const [loading, setLoading] = useState(false)
 
   const [prompt, setPrompt] = useState('')
-  const [mode, setMode] = useState('')
+  const [mode, setMode] = useState('text')
   const [isPublished, setIsPublished] = useState(false)
 
   const onSubmit = async (e) => {

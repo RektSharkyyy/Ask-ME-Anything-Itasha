@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyChats, dummyUserData } from "../assets/assets";
 import axios from 'axios'
 import toast from "react-hot-toast";
 
@@ -16,7 +15,7 @@ export const AppContextProvider = ({ children }) => {
     const [chats, setChats] = useState([])
     const [selectedChat, setSelectedChat] = useState(null)
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-    const [token, setToken] = useState(localStorage.getItem('Token') || null)
+    const [token, setToken] = useState(localStorage.getItem('token') || null)
     const [loadingUser, setLoadingUser] = useState(true)
 
     const fetchUser = async () => {
@@ -36,34 +35,44 @@ export const AppContextProvider = ({ children }) => {
 
     const createNewChat = async () => {
         try {
-            if (!user) return toast('Login to create a new chat')
-            navigate('/')
-            await axios.get('/api/chat/create', { headers: { Authorization: token } })
-            fetchUsersChats()
+            if (!user) return toast.error('Login to create a new chat');
+            if (!token) return toast.error('Please login again');
+
+            navigate('/');
+            await axios.get('/api/chat/create', { headers: { Authorization: token } });
+            await fetchUsersChats();
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
+    };
 
     const fetchUsersChats = async () => {
         try {
-            const data = await axios.get('/api/chat/get', { headers: { Authorization: token } })
+            if (!token) return toast.error('Please login again');
+
+            const { data } = await axios.get('/api/chat/get', { headers: { Authorization: token } });
             if (data.success) {
-                setChats(data.chats)
-                // If the user has no chats, create one
                 if (data.chats.length === 0) {
-                    await createNewChat()
-                    return fetchUsersChats()
+                    await createNewChat();
+                    const { data: retry } = await axios.get('/api/chat/get', { headers: { Authorization: token } });
+                    if (retry.success && retry.chats.length > 0) {
+                        setChats(retry.chats);
+                        setSelectedChat(retry.chats[0]);
+                    } else {
+                        toast.error("Unable to create or fetch chat");
+                    }
                 } else {
-                    setSelectedChat(data.chats[0])
+                    setChats(data.chats);
+                    setSelectedChat(data.chats[0]);
                 }
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
+    };
+
 
     useEffect(() => {
         if (theme === 'dark') {
